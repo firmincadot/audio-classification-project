@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from python_speech_features import mfcc, logfbank
+import librosa
 
 def plot_signals(signals):
     fig, axes = plt.subplots(nrows=2, ncols=5, sharex=False,
@@ -62,3 +63,26 @@ def plot_mfccs(mfccs):
             axes[x,y].get_yaxis().set_visible(False)
             i += 1
 
+
+#Loading Data
+df = pd.read_csv('instruments.csv')
+df.set_index('fname',inplace=True)
+
+for f in df.index :
+    rate, signal = wavfile.read('wavfiles/'+f)
+    df.at[f,'length'] = signal.shape[0]/rate
+
+print(df)
+
+#Class Distribution
+classes = list(np.unique(df.label))
+class_dist = df.groupby(['label'])['length'].mean()
+
+print(class_dist)
+
+fig, ax = plt.subplots()
+ax.set_title('Class Distribution')
+ax.pie(class_dist, labels=class_dist.index, autopct='%1.1f%%', shadow=False, startangle=90)
+ax.axis('equal')
+plt.show()
+df.reset_index(inplace=True)
